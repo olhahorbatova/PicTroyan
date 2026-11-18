@@ -1,9 +1,6 @@
 from base64 import decode
-
 from PIL import Image
-
 img = Image.open('cat.jpg')
-
 def secret_text():
     text = "Dangerous script"
     bynary_text = text.encode('utf-8')
@@ -18,7 +15,7 @@ def injection(img, datas):
     pixels = img_rgb.load()
 
     pointer = 0
-    secret_text_len = len(secret_text())
+    secret_text_len = len(datas)
 
     for x in range(width):
         for y in range(height):
@@ -26,12 +23,19 @@ def injection(img, datas):
                 break
             r,g,b = pixels[x,y]
             print(r,g,b)
+            if pointer < secret_text_len:
+                r = (r & ~1) | int(datas[pointer])
+                pointer += 1
+            if pointer < secret_text_len:
+                g = (g & ~1) | int(datas[pointer])
+                pointer += 1
+            if pointer < secret_text_len:
+                b = (b & ~1) | int(datas[pointer])
+                pointer += 1
 
-    return pixels
-
-
+            pixels[x,y] = (r,g,b)
+            print("-----------------------")
+            print(r,g,b)
+    img_rgb.save('cat_secret.png')
+    return img_rgb
 print(injection(img, st))
-
-
-
-
