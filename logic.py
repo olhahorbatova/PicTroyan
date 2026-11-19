@@ -4,9 +4,9 @@ img = Image.open('cat.jpg')
 def secret_text():
     text = "Dangerous script"
     bynary_text = text.encode('utf-8')
-    decode = ''.join(format(b, '08b') for b in bynary_text)#to 0 && 1 from str:)
+    decodes = ''.join(format(b, '08b') for b in bynary_text)#to 0 && 1 from str:)
 
-    return decode#len128
+    return decodes#len128
 
 secret_text_len = 128
 st = secret_text()
@@ -35,12 +35,12 @@ def injection(img, datas):
 
             pixels[x,y] = (r,g,b)
             list.append((r, g, b))
-    print(f'eto dlinna shifrovanogo {len(list)}')
+
     img_rgb.save('cat_secret.png')
-    return img_rgb
+    return img_rgb, len(list)
 
-injection(img, st)
-
+cat, lenlist = injection(img, st)
+#print(lenlist)
 def extractor(img, lenght_extract):
     pointer = 0
     li = []
@@ -56,15 +56,27 @@ def extractor(img, lenght_extract):
                 li.append(pixels[x,y])
                 pointer += 1
 
-    print(f'dlinna spiska dlia deshifratora (RGB) {len(li)}')
+    #print(f'dlinna spiska dlia deshifratora (RGB) {len(li)}')
     li_bit = []
     for i in range(0, len(li)):
         for j in range(0, len(li[i])):
             if li[i][j] % 2 == 0:
                 li_bit.append(0)
-            else:
+            if  li[i][j] % 2 == 1:
                 li_bit.append(1)
-    print(len(li_bit))
+            if len(li_bit) == secret_text_len:
+                break
+
+    lenlibit = len(li_bit)
+    #print(li_bit)
+    str_bit = "".join(map(str, li_bit))
+    #print(str_bit)
+    litera = lenlibit // 8
+
+    for i in range(0, len(str_bit), 8):
+        s = str_bit[i:i+8]
+        print(chr(int(s, 2)), end='')
+
 
 
 
