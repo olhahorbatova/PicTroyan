@@ -19,6 +19,7 @@ def injection(img, datas):
     header = format(secret_text_len, '032b')
     all_len = header + datas
     sum = len(all_len)
+
     for x in range(width):
         for y in range(height):
             if pointer >= sum:
@@ -37,11 +38,12 @@ def injection(img, datas):
             pixels[x, y] = (r, g, b)
             list1.append((r, g, b))
     img_rgb.save('cat_secret.png')
-    return img_rgb, list1#160
+    return img_rgb, list1, sum
 
-cat, list1 = injection(img, st)
+cat, list1, sum = injection(img, st)
 a = len(list1)
-print(len(list1))#160
+print(len(list1))#54
+print(sum)
 
 def header_extract(list_header):
     li_32 = []
@@ -59,15 +61,16 @@ def header_extract(list_header):
     return int_header
 
 int_header = header_extract(list1)
-
+print(int_header)
 def extractor(img, lenght_extract, header):
     pointer = 0
     li = []
     img = Image.open(img)
     img_rgb = img.convert('RGB')
     pixels = img_rgb.load()
-    for x in range(0, a):
-        for y in range(0, a):
+    width, height = img.size
+    for x in range(0, width):
+        for y in range(0, height):
             if pointer >= lenght_extract:
                 break
             if pointer < lenght_extract:
@@ -85,7 +88,6 @@ def extractor(img, lenght_extract, header):
                 break
 
     lenlibit = len(li_bit)
-    print(li_bit)
     str_bit = "".join(map(str, li_bit))
     litera = lenlibit // 8
     for i in range(32, len(str_bit), 8):
@@ -93,4 +95,4 @@ def extractor(img, lenght_extract, header):
         print(chr(int(s, 2)), end='')
 
 
-extractor('cat_secret.png', 54, 128)
+extractor('cat_secret.png', a, int_header)
