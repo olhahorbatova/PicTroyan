@@ -1,23 +1,48 @@
 from base64 import decode
 from PIL import Image
 img = Image.open('cat.jpg')
-def secret_text():
-    text = "Dangerous script"
+def secret_text(text):
     bynary_text = text.encode('utf-8')
     decodes = ''.join(format(b, '08b') for b in bynary_text)#to 0 && 1 from str:)
+    return decodes#len chranit` v secret_text_len
 
-    return decodes#len128
 
-secret_text_len = 128
-st = secret_text()
-
+st = secret_text("Dangerous script")#rozpakouka def
+secret_text_len = len(st)
+#print(len(st))
+#print(f'My secret text {st}')
 def injection(img, datas):
     width, height = img.size
     img_rgb = img.convert('RGB')
     pixels = img_rgb.load()
     secret_text_len = len(datas)
     pointer = 0
+    pointer_len = 0
     list = []
+    list32byt = []
+    bynary_len = format(secret_text_len, '032b')
+    print(bynary_len)
+    for x in range(width):#cycle dlia zapisi 32 bit v nachale stroki
+        for y in range(height):
+            if pointer_len >= 32:
+                break
+            r, g, b = pixels[x, y]
+            if pointer_len < 32:
+                r = (r & ~1) | int(bynary_len[pointer_len])
+                pointer_len += 1
+            if pointer_len < 32:
+                g = (g & ~1) | int(bynary_len[pointer_len])
+                pointer_len += 1
+            if pointer_len < 32:
+                b = (b & ~1) | int(bynary_len[pointer_len])
+                pointer_len += 1
+
+            pixels[x, y] = (r, g, b)
+            list32byt.append((r, g, b))
+    print(list32byt)
+
+    img_rgb.save('cat_secret.png')
+
     for x in range(width):
         for y in range(height):
             if pointer >= secret_text_len:
@@ -36,11 +61,11 @@ def injection(img, datas):
             pixels[x,y] = (r,g,b)
             list.append((r, g, b))
 
-    img_rgb.save('cat_secret.png')
+    #img_rgb.save('cat_secret.png')
     return img_rgb, len(list)
 
 cat, lenlist = injection(img, st)
-#print(lenlist)
+
 def extractor(img, lenght_extract):
     pointer = 0
     li = []
